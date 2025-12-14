@@ -5,22 +5,66 @@
 ```
 rennsyuuyou-202512/
 ├── docs/
-│   ├── design.md           # 設計書（本ドキュメント）
-│   └── file-structure.md   # ファイル構成（このファイル）
-├── src/
-│   ├── index.html          # メインHTMLファイル
+│   ├── design.md               # ゲーム設計書
+│   ├── file-structure.md       # ファイル構成（このファイル）
+│   └── firebase-hosting-plan.md # Firebase Hostingデプロイ計画・実施記録
+├── src/                        # Firebase Hostingの公開ディレクトリ
+│   ├── index.html              # メインHTMLファイル
 │   ├── css/
-│   │   └── style.css       # スタイルシート
+│   │   └── style.css           # スタイルシート
 │   └── js/
-│       ├── main.js         # エントリーポイント、Gameクラス
-│       ├── board.js        # Boardクラス
-│       ├── piece.js        # Pieceクラス、テトリミノ定義
-│       ├── input.js        # InputHandlerクラス
-│       └── renderer.js     # Rendererクラス
-└── README.md               # プロジェクト説明（任意）
+│       ├── main.js             # エントリーポイント、Gameクラス
+│       ├── board.js            # Boardクラス
+│       ├── piece.js            # Pieceクラス、テトリミノ定義
+│       ├── input.js            # InputHandlerクラス
+│       └── renderer.js         # Rendererクラス
+├── .firebase/                  # Firebaseキャッシュ（gitignore対象）
+├── .firebaserc                 # Firebaseプロジェクト設定
+├── .gitignore                  # Git除外設定
+├── firebase.json               # Firebase Hosting設定
+└── README.md                   # プロジェクト説明
 ```
 
 ## 各ファイルの役割
+
+### ルートディレクトリ
+
+#### firebase.json
+
+Firebase Hostingの設定ファイル。
+
+```json
+{
+  "hosting": {
+    "public": "src",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
+```
+
+#### .firebaserc
+
+Firebaseプロジェクトの設定。
+
+```json
+{
+  "projects": {
+    "default": "tetris-game-202512"
+  }
+}
+```
+
+#### .gitignore
+
+Gitで管理しないファイルの設定。
+
+```
+.firebase/
+```
 
 ### src/index.html
 
@@ -75,7 +119,6 @@ rennsyuuyou-202512/
 - Canvasのボーダー・背景
 - 情報パネルのスタイル
 - ボタンのスタイル
-- レスポンシブ対応（任意）
 
 ### src/js/piece.js
 
@@ -88,10 +131,8 @@ rennsyuuyou-202512/
 **クラス:**
 - `Piece`: テトリミノを表すクラス
 
-**エクスポート:**
-- `Piece`クラス
-- `PIECES`定数
-- `getRandomPieceType()`関数
+**関数:**
+- `getRandomPieceType()`: ランダムなピースタイプを返す
 
 ### src/js/board.js
 
@@ -104,23 +145,15 @@ rennsyuuyou-202512/
 **クラス:**
 - `Board`: ゲームフィールドを管理するクラス
 
-**エクスポート:**
-- `Board`クラス
-- `BOARD_WIDTH`, `BOARD_HEIGHT`定数
-
 ### src/js/renderer.js
 
 Canvas描画処理。
 
 **定数:**
 - `CELL_SIZE`: 30
-- `COLORS`: 各種色定義
 
 **クラス:**
 - `Renderer`: 描画を担当するクラス
-
-**エクスポート:**
-- `Renderer`クラス
 
 ### src/js/input.js
 
@@ -128,9 +161,6 @@ Canvas描画処理。
 
 **クラス:**
 - `InputHandler`: キー入力を処理するクラス
-
-**エクスポート:**
-- `InputHandler`クラス
 
 ### src/js/main.js
 
@@ -149,16 +179,11 @@ Canvas描画処理。
 
 1. `piece.js` - 依存なし
 2. `board.js` - 依存なし
-3. `renderer.js` - 依存なし
+3. `renderer.js` - BOARD_WIDTH, BOARD_HEIGHTに依存
 4. `input.js` - Gameクラスに依存（後から参照設定）
 5. `main.js` - 上記すべてに依存
 
 ## グローバル変数の管理
 
-ES Modulesを使用しない場合、各クラスはグローバルスコープに配置される。
+各クラスはグローバルスコープに配置される。
 名前空間の衝突を避けるため、クラス名はプロジェクト固有の命名とする。
-
-代替案としてES Modulesを使用する場合:
-- `type="module"`をscriptタグに追加
-- 各ファイルでexport/importを使用
-- ローカルサーバーでの実行が必要

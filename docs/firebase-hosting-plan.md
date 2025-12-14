@@ -5,101 +5,96 @@
 テトリスゲームをFirebase Hostingを使用して公開する。
 GCPアカウント `hy.unimail.11@gmail.com` で新規Firebaseプロジェクトを作成。
 
+## 実施結果
+
+| 項目 | 内容 |
+|------|------|
+| 実施日 | 2024年12月14日 |
+| ステータス | 完了 |
+| プロジェクトID | tetris-game-202512 |
+| 公開URL | https://tetris-game-202512.web.app |
+| Firebaseコンソール | https://console.firebase.google.com/project/tetris-game-202512/overview |
+
 ## 前提条件
 
 - GCPアカウント: `hy.unimail.11@gmail.com`
 - Firebase CLI がインストールされていること
 - Node.js がインストールされていること
 
-## 作業手順
+## 実施した作業手順
 
 ### Phase 1: 環境準備
 
-1. **Firebase CLIの確認/インストール**
+1. **Firebase CLIの確認**
    ```bash
    firebase --version
-   # インストールされていない場合
-   npm install -g firebase-tools
+   # 結果: 14.19.1
    ```
 
 2. **Firebaseへのログイン**
    ```bash
-   firebase login
-   # hy.unimail.11@gmail.com でログイン
+   firebase login --reauth
+   # hy.unimail.11@gmail.com でログイン完了
    ```
 
 ### Phase 2: Firebaseプロジェクト作成
 
-1. **新規プロジェクト作成**
-   - プロジェクトID: `tetris-game-[unique-suffix]`
-   - プロジェクト名: `Tetris Game`
-   - Firebaseコンソールまたは CLI で作成
-
-2. **プロジェクト作成コマンド（CLI）**
+1. **プロジェクト作成コマンド（CLI）**
    ```bash
-   firebase projects:create tetris-game-[unique-suffix] --display-name "Tetris Game"
+   firebase projects:create tetris-game-202512 --display-name "Tetris Game"
    ```
+   - GCPプロジェクトも自動作成された
+   - 無料プラン（Spark）で利用可能
 
 ### Phase 3: Firebase Hosting 設定
 
-1. **プロジェクトディレクトリでFirebase初期化**
-   ```bash
-   firebase init hosting
+1. **設定ファイルを手動作成**
+
+   `firebase.json`:
+   ```json
+   {
+     "hosting": {
+       "public": "src",
+       "ignore": [
+         "firebase.json",
+         "**/.*",
+         "**/node_modules/**"
+       ]
+     }
+   }
    ```
 
-2. **設定内容**
-   - Public directory: `src`
-   - Single-page app: No
-   - GitHub Actions: No（手動デプロイのため）
+   `.firebaserc`:
+   ```json
+   {
+     "projects": {
+       "default": "tetris-game-202512"
+     }
+   }
+   ```
 
-3. **生成されるファイル**
-   - `firebase.json` - Hosting設定
-   - `.firebaserc` - プロジェクト設定
+2. **`.gitignore`に追加**
+   ```
+   .firebase/
+   ```
 
-### Phase 4: firebase.json 設定
-
-```json
-{
-  "hosting": {
-    "public": "src",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "headers": [
-      {
-        "source": "**/*.@(js|css)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "max-age=31536000"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-### Phase 5: デプロイ
+### Phase 4: デプロイ
 
 1. **デプロイ実行**
    ```bash
    firebase deploy --only hosting
    ```
 
-2. **デプロイ後のURL**
-   - `https://[project-id].web.app`
-   - `https://[project-id].firebaseapp.com`
+2. **デプロイ結果**
+   - 7ファイルがアップロードされた
+   - 公開URL: https://tetris-game-202512.web.app
 
-### Phase 6: 確認・検証
+### Phase 5: 確認・検証
 
-1. デプロイされたURLにアクセス
-2. ゲームが正常に動作することを確認
-3. 各ブラウザでの動作確認
+1. デプロイされたURLにアクセス → 正常動作確認
+2. ゲームプレイ可能を確認
 
-## ファイル構成（デプロイ後）
+## 最終ファイル構成
 
 ```
 rennsyuuyou-202512/
@@ -107,7 +102,7 @@ rennsyuuyou-202512/
 │   ├── design.md
 │   ├── file-structure.md
 │   └── firebase-hosting-plan.md  # この計画書
-├── src/                          # ← Firebase Hostingの公開ディレクトリ
+├── src/                          # Firebase Hostingの公開ディレクトリ
 │   ├── index.html
 │   ├── css/
 │   │   └── style.css
@@ -117,37 +112,28 @@ rennsyuuyou-202512/
 │       ├── piece.js
 │       ├── input.js
 │       └── renderer.js
-├── firebase.json                 # Firebase設定
+├── .firebase/                    # キャッシュ（gitignore対象）
 ├── .firebaserc                   # プロジェクト設定
+├── .gitignore
+├── firebase.json                 # Firebase設定
 └── README.md
 ```
 
-## 実行コマンド一覧
+## 再デプロイ手順
+
+変更を加えた後、以下のコマンドで再デプロイ可能:
 
 ```bash
-# 1. Firebase CLIインストール（未インストールの場合）
-npm install -g firebase-tools
-
-# 2. Firebaseログイン
+# Firebaseにログイン（必要な場合）
 firebase login
 
-# 3. プロジェクト作成
-firebase projects:create tetris-game-xxxxx --display-name "Tetris Game"
-
-# 4. Hosting初期化
-firebase init hosting
-
-# 5. デプロイ
+# デプロイ
 firebase deploy --only hosting
 ```
 
 ## 注意事項
 
-- プロジェクトIDはグローバルで一意である必要がある
+- プロジェクトIDはグローバルで一意
 - 無料プラン（Spark）でHostingは利用可能
 - カスタムドメインは後から設定可能
-
-## 成果物
-
-- 公開URL: `https://[project-id].web.app`
-- Firebaseコンソール: `https://console.firebase.google.com/project/[project-id]`
+- 請求先アカウントの設定は不要（無料枠内）
